@@ -1,0 +1,21 @@
+---
+# tasks file for docker
+- name: Configuring docker-ce repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+  become: yes      
+
+- name: install docker
+  yum:
+    name: docker
+    state: present
+    update_cache: true
+- name: enable service docker
+  systemd:
+    name: docker
+    enabled: yes    
+#- name: Make sure a docker is running
+#   systemd:
+#     state: started
+#     name: docker    

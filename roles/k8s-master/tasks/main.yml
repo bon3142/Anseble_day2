@@ -1,0 +1,33 @@
+---
+# tasks file for k8s-master
+- name: Mesage - kubeadm init
+  shell: >
+    kubeadm init \ 
+    --pod-network-cidr 10.244.0.0/16 \
+    --apiserver-advertise-address 192.168.56.15 
+  register: kubeadmitout
+- debug:
+    msg: "{{kubeadmitout}}"     
+- name: create .kube directory
+  become: yes
+  file:
+    path: /home/devops/.kube
+    state: directory
+    mode: 0755    
+- name: copy admin.conf to user's kube config
+  become: yes
+  copy:    
+    src: /etc/kubernetes/admin.conf
+    dest: /home/devops/.kube/config
+    owner: devops
+    remote_src: yes
+- name: Flannel 
+  shell: 
+    kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
+  become: true
+  become_user: devops 
+- name: patch + token   
+  shell: |
+    kubectl patch daemonsets kube-flannel-ds-amd64 -n kube-system --patch='{"spec":{"template":{"spec":{"containers":[{"name": "kube-flannel", "args": ["--ip-masq", "--kube-subnet-mgr", "--iface='enp0s8'"]}]}}}}'
+    kubeadm token list | awk '{ print $1 }'| awk NR==2 > /vagrant/token
+  changed_when: no

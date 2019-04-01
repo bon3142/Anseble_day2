@@ -1,0 +1,67 @@
+---
+# tasks file for k8s-base
+- name: add repo
+  yum_repository:
+    name: kuberepo
+    description: kubernetes-repo
+    baseurl: "https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64"
+    enabled: yes
+    gpgcheck: yes
+    repo_gpgcheck: yes
+    gpgkey:
+      - "https://packages.cloud.google.com/yum/doc/yum-key.gpg"
+      - "https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
+- name: install kubelet
+  yum:
+    name: kubelet
+    state: present
+    update_cache: true
+
+- name: install kubeadm
+  yum:
+    name: kubeadm
+    state: present
+    update_cache: true
+
+- name: install kubectl
+  yum:
+    name: kubectl
+    state: present
+    update_cache: true
+- name: install deltarpm
+  yum:
+    name: deltarpm 
+    state: present
+    update_cache: true
+- name: enable service kubelet
+  systemd:
+    name: kubelet
+    enabled: yes
+- name: Make sure a kubelet is running
+  systemd:
+    state: started
+    name: kubelet
+- name: Make sure a docker is running
+  systemd:
+    state: started
+    name: docker        
+
+- name: update kernel settings
+  become: yes
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+- name: update kernel settings
+  become: yes
+  sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+- name: reload kubeadm
+  shell: kubeadm reset --force          

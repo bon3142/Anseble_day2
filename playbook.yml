@@ -1,0 +1,15 @@
+- hosts: all
+  become: yes
+  roles:
+  - devops_user
+  - common
+  - docker
+  - k8s-base
+- hosts: masters1
+  become: yes
+  roles:
+  - k8s-master
+- hosts: workers1
+  become: yes
+  roles:
+  - k8s-worker

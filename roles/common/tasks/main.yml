@@ -1,0 +1,34 @@
+---
+# tasks file for common
+- name: Remove swapfile from /etc/fstab
+  mount:
+    name: swap
+    fstype: swap
+    state: absent
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+
+- name: Install a list of packages
+  yum:
+    name:
+      - epel-release
+      - ntp
+      - net-tools
+      - jq
+      - bind-utils
+      - moreutils
+      - wget
+    state: present
+- name: enable service ntp
+  systemd:
+    name: ntpd
+    enabled: yes
+- name: Make sure a ntp is running
+  systemd:
+    state: started
+    name: ntpd  

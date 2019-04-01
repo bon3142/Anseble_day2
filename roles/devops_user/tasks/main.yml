@@ -1,0 +1,25 @@
+---
+# tasks file for devops_user
+- name: new users creation devops
+  user:
+    name: devops
+    password: "{{ 'devops' | password_hash('sha512') }}" 
+- name: give permitions to devops
+  lineinfile:
+    path: /etc/sudoers
+    line: 'devops ALL=(ALL) ALL'
+- name: make direcotry
+  file:
+    path: "/home/devops/.ssh"
+    state: directory
+- name: create empty file
+  file:
+    path: "/home/devops/.ssh/authorized_keys"
+    state: touch 
+- name: copy key from LOCM to remoute
+  copy:
+    src: /home/student/ansible/day1/devops.pem.pub
+    dest: /home/devops/.ssh/authorized_keys
+    owner: devops
+    group:  devops
+    mode: 0755 
